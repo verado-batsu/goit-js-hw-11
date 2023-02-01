@@ -69,7 +69,15 @@ async function onMoreClick(e) {
 		renderImages(images);
 		page += 1;
 
-		const { height: cardHeight } = document
+		if (images.length < 40) {
+			refs.loadMoreBtn.classList.remove('visible');
+		}
+
+	} catch (error) {
+		console.log(error.message);
+	}
+
+	const { height: cardHeight } = document
 		.querySelector(".gallery")
 		.firstElementChild.getBoundingClientRect();
 
@@ -77,14 +85,6 @@ async function onMoreClick(e) {
 			top: cardHeight * 3,
 			behavior: "smooth",
 		});
-
-		if (images.length <= 40) {
-			refs.loadMoreBtn.classList.remove('visible');
-		}
-
-	} catch (error) {
-		console.log(error.message);
-	}
 }
 
 function clearGallery() {
