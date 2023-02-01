@@ -78,6 +78,10 @@ async function onMoreClick(e) {
 			behavior: "smooth",
 		});
 
+		if (images.length <= 40) {
+			refs.loadMoreBtn.classList.remove('visible');
+		}
+
 	} catch (error) {
 		console.log(error.message);
 	}
