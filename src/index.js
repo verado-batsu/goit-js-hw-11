@@ -1,5 +1,8 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchImages } from './js/fetchImages';
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
+
 
 const refs = {
 	formEl: document.querySelector('.search-form'),
@@ -13,9 +16,6 @@ let page = null;
 
 refs.formEl.addEventListener('submit', onFormSubmit);
 refs.loadMoreBtn.addEventListener('click', onMoreClick);
-
-
-
 
 async function onFormSubmit(e) {
 	e.preventDefault();
@@ -33,20 +33,24 @@ async function onFormSubmit(e) {
 
 	try {
 		const response = await fetchImages(inputValue, page);
-		const imagesData = await response.json();
 
-		if (imagesData.total === 0) {
+		if (response.totalHits === 0) {
 			Notify.failure('Sorry, there are no images matching your search query. Please try again.');
 			return;
 		}
 
+		Notify.success(`Hooray! We found ${response.totalHits} images.`);
+
 		page += 1;
-		const images = imagesData.hits;
+		const images = response.hits;
 		renderImages(images);
-		refs.loadMoreBtn.classList.add('visible');
+
+		if (!(response.totalHits <= 40)) {
+			refs.loadMoreBtn.classList.add('visible');
+		}
 
 	} catch (error) {
-		console.log('Error!!!');
+		console.log(error.message);
 	}
 	
 }
@@ -54,20 +58,25 @@ async function onFormSubmit(e) {
 async function onMoreClick(e) {
 	try {
 		const response = await fetchImages(inputValue, page);
-		const imagesData = await response.json();
-
-		console.log(imagesData.totalHits);
 		
-		if (imagesData.hits.length === 0) {
-			
+		if (response.hits.length === 0) {
 			Notify.failure("We're sorry, but you've reached the end of search results.");
 			refs.loadMoreBtn.classList.remove('visible');
 			return;
 		}
-		const images = imagesData.hits;
+		const images = response.hits;
 
 		renderImages(images);
 		page += 1;
+
+		const { height: cardHeight } = document
+		.querySelector(".gallery")
+		.firstElementChild.getBoundingClientRect();
+
+		window.scrollBy({
+			top: cardHeight * 3,
+			behavior: "smooth",
+		});
 
 	} catch (error) {
 		console.log(error.message);
@@ -77,6 +86,8 @@ async function onMoreClick(e) {
 function clearGallery() {
 	refs.galleryEl.innerHTML = '';
 }
+
+let lightbox = new SimpleLightbox('.gallery a', { /* options */ });
 
 function renderImages(images) {
 	const markup = images.map(image => {
@@ -91,30 +102,34 @@ function renderImages(images) {
 		} = image;
 		
 		return `
-		<div class="photo-card">
-			<img src="${webformatURL}" alt="${tags}" loading="lazy" />
-			<div class="info">
-				<p class="info-item">
-				<b>Likes</b>
-				${likes}
-				</p>
-				<p class="info-item">
-				<b>Views</b>
-				${views}
-				</p>
-				<p class="info-item">
-				<b>Comments</b>
-				${comments}
-				</p>
-				<p class="info-item">
-				<b>Downloads</b>
-				${downloads}
-				</p>
+		<a class="link-card-wrapper" href="${largeImageURL}">
+			<div class="photo-card">
+				<img src="${webformatURL}" alt="${tags}" loading="lazy" />
+				<div class="info">
+					<p class="info-item">
+					<b>Likes</b>
+					${likes}
+					</p>
+					<p class="info-item">
+					<b>Views</b>
+					${views}
+					</p>
+					<p class="info-item">
+					<b>Comments</b>
+					${comments}
+					</p>
+					<p class="info-item">
+					<b>Downloads</b>
+					${downloads}
+					</p>
+				</div>
 			</div>
-		</div>
+		</a>
 		`
 	})
 		.join('');
 	
 	refs.galleryEl.insertAdjacentHTML('beforeend', markup);
+
+	lightbox.refresh();
 }

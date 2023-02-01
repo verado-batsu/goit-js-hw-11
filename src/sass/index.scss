@@ -4,6 +4,10 @@ body {
 	font-family: sans-serif;
 }
 
+main {
+	padding-bottom: 10px;
+}
+
 .search-form {
 	display: flex;
 	justify-content: center;
@@ -40,10 +44,14 @@ body {
 	padding: 10px;
 }
 
+.link-card-wrapper {
+	width: calc((100% - (15px * 3)) / 4);
+	color: black;
+}
+
 .photo-card {
 	display: flex;
 	flex-direction: column;
-	width: calc((100% - (15px * 3)) / 4);
 }
 
 .photo-card > img {
