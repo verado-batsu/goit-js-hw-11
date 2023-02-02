@@ -47,6 +47,7 @@ async function onFormSubmit(e) {
 
 		if (!(response.totalHits <= 40)) {
 			refs.loadMoreBtn.classList.add('visible');
+			return;
 		}
 
 	} catch (error) {
@@ -58,18 +59,13 @@ async function onFormSubmit(e) {
 async function onMoreClick(e) {
 	try {
 		const response = await fetchImages(inputValue, page);
-		
-		if (response.hits.length === 0) {
-			Notify.failure("We're sorry, but you've reached the end of search results.");
-			refs.loadMoreBtn.classList.remove('visible');
-			return;
-		}
 		const images = response.hits;
 
 		renderImages(images);
 		page += 1;
 
 		if (images.length < 40) {
+			Notify.failure("We're sorry, but you've reached the end of search results.");
 			refs.loadMoreBtn.classList.remove('visible');
 		}
 
